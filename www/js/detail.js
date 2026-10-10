@@ -69,38 +69,58 @@ function bindEvents(post) {
   });
 
   copyContactBtn.addEventListener('click', async () => {
-    const text = `${post.contactType}：${post.contact}`;
+    const text = post.contact;
+
+    const fallbackCopy = () => {
+      const temporaryInput = document.createElement('textarea');
+      temporaryInput.value = text;
+      temporaryInput.setAttribute('readonly', '');
+      temporaryInput.style.position = 'fixed';
+      temporaryInput.style.opacity = '0';
+      document.body.appendChild(temporaryInput);
+      
+      temporaryInput.focus();
+      temporaryInput.select();
+      temporaryInput.setSelectionRange(0, 99999);
+      
+      const copied = document.execCommand('copy');
+      temporaryInput.remove();
+      
+      if (!copied) {
+        throw new Error('复制失败');
+      }
+    };
 
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const temporaryInput = document.createElement('textarea');
-        temporaryInput.value = text;
-        temporaryInput.setAttribute('readonly', '');
-        temporaryInput.style.position = 'fixed';
-        temporaryInput.style.opacity = '0';
-        document.body.appendChild(temporaryInput);
-        temporaryInput.select();
-        const copied = document.execCommand('copy');
-        temporaryInput.remove();
-
-        if (!copied) {
-          throw new Error('Clipboard copy command was rejected');
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (err) {
+          fallbackCopy();
         }
+      } else {
+        fallbackCopy();
       }
 
       copyContactBtn.textContent = '已复制';
       setTimeout(() => {
         copyContactBtn.textContent = '复制联系方式';
       }, 2000);
+      
     } catch (error) {
       console.error('复制联系方式失败', error);
       alert('复制失败，请手动复制显示的联系方式');
     }
   });
 
-  // 如果已经解决，按钮变灰
+  if (post.publisher === "我自己") {
+    getContactBtn.textContent = "这是您发布的帖子";
+    getContactBtn.style.background = "#f5f6f8";
+    getContactBtn.style.color = "#999999";
+    getContactBtn.style.cursor = "not-allowed";
+    return;
+  }
+
   if (post.status === "resolved") {
     getContactBtn.textContent = post.type === "lost"
       ? "该物品已找到"
@@ -111,26 +131,21 @@ function bindEvents(post) {
     return;
   }
 
-  // 1. 点击获取联系方式 -> 弹出安全须知
   getContactBtn.addEventListener('click', () => {
     safetyModal.classList.remove('hidden');
   });
 
-  // 2. 拒绝 -> 关闭弹窗
   cancelBtn.addEventListener('click', () => {
     safetyModal.classList.add('hidden');
   });
 
-  // 3. 我已了解 -> 关闭弹窗，底部丝滑滑出成功横幅
   confirmBtn.addEventListener('click', () => {
     safetyModal.classList.add('hidden');
     contactInfo.textContent = `${post.contactType}：${post.contact}`;
     
-    // 给一点点延迟，让弹窗消失后再滑出横幅，动画更高级
     setTimeout(() => {
       successBanner.classList.remove('hidden');
       
-      // 把原来的 0.5 改成 0，原按钮就会完全隐身，给新弹窗腾出视觉空间
       getContactBtn.style.opacity = "0"; 
       getContactBtn.style.pointerEvents = "none";
     }, 200);

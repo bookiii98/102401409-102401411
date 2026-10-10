@@ -26,6 +26,7 @@ textarea {
 }
 
 /* 底部悬浮胶囊导航 */
+/* 底部悬浮胶囊导航 */
 .bottom-nav {
   position: fixed;
   bottom: 24px;
@@ -36,17 +37,16 @@ textarea {
   height: 68px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
+  justify-content: space-evenly; /* 【关键修改】使用 space-evenly 自动均分，代替写死的 gap */
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px); /* 毛玻璃效果 */
-  border-radius: 34px; /* 大圆角胶囊 */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); /* 去除原有的 border-top[cite: 9]，改为柔和阴影 */
+  backdrop-filter: blur(10px); 
+  border-radius: 34px; 
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); 
   z-index: 100;
 }
 
 .bottom-nav a {
-  color: #999999; /* 默认灰色[cite: 9] */
+  color: #999999; 
   text-decoration: none;
   font-size: 11px;
   display: flex;
@@ -54,7 +54,7 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 5.5px 19.5px;
+  padding: 6px 14px; /* 【关键修改】稍微调小 padding，防止在窄屏手机上溢出变形 */
   border-radius: 32px;
   transition: all 0.2s ease;
 }
